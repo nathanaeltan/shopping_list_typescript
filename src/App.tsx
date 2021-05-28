@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { store } from "./state";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 export const App = () => (
   <Provider store={store}>
     <ChakraProvider theme={theme}>
@@ -11,6 +12,7 @@ export const App = () => (
         <Router>
           <Switch>
             <Route exact path="/" component={Login} />
+            <Route exact path="/register" component={Register} />
           </Switch>
         </Router>
       </div>

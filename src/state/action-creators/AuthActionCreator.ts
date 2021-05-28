@@ -17,13 +17,19 @@ export const register = (form: RegisterRequestPayload) => {
       headers: {
         "Content-Type": "application/json",
       },
+      withCredentials: true,
     };
     try {
       const body = JSON.stringify(form);
-      const res = await axios.post("/api/v1/users", body, config);
+      const res = await axios.post(
+        "http://localhost:8080/api/v1/users",
+        body,
+        config
+      );
+     
       const payload = {
-        token: res.headers.Authorization,
-        userId: res.headers.UserID,
+        token: res.headers.authorization,
+        userId: res.headers.userid,
       };
       dispatch({
         type: AuthActionType.REGISTER_SUCCESS,
