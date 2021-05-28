@@ -26,9 +26,18 @@ interface LoginFailureAction {
   payload: string;
 }
 
+interface VerifyUserSuccess {
+  type: AuthActionType.VERIFY_SUCCESS;
+}
+interface VerifyUserFailure {
+  type: AuthActionType.VERIFY_FAILURE;
+}
+
 export type AuthAction =
   | AuthRequest
   | RegisterSuccessAction
   | RegisterFailureAction
   | LoginSuccessAction
-  | LoginFailureAction;
+  | LoginFailureAction
+  | VerifyUserFailure
+  | VerifyUserSuccess;

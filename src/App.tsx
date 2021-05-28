@@ -1,21 +1,40 @@
 import * as React from "react";
 import { ChakraProvider, theme } from "@chakra-ui/react";
-import { Provider } from "react-redux";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { store } from "./state";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-export const App = () => (
-  <Provider store={store}>
+import Dashboard from "./pages/Dashboard";
+import { useEffect } from "react";
+import { loadUser } from "./state/action-creators";
+import PrivateRoute from "./components/PrivateRoute";
+import { useSelector } from "./hooks/useTypedSelector";
+require("dotenv").config();
+const App = () => {
+  useEffect(() => {
+    store.dispatch(loadUser());
+  }, []);
+
+  const auth = useSelector((state) => state.auth);
+
+  return (
     <ChakraProvider theme={theme}>
       <div>
         <Router>
           <Switch>
             <Route exact path="/" component={Login} />
             <Route exact path="/register" component={Register} />
+            <PrivateRoute
+              Route
+              exact
+              path="/dashboard"
+              component={Dashboard}
+              auth={auth}
+            />
           </Switch>
         </Router>
       </div>
     </ChakraProvider>
-  </Provider>
-);
+  );
+};
+export default App;
