@@ -23,9 +23,16 @@ export const fetchUsersShoppingLists =
         payload: res.data,
       });
     } catch (error) {
-      dispatch({
-        type: ShoppingListActionType.GET_SHOPPING_LIST_FAIL,
-        payload: error.response.data.message,
-      });
+      if (error.response) {
+        dispatch({
+          type: ShoppingListActionType.GET_SHOPPING_LIST_FAIL,
+          payload: error.response.data.message,
+        });
+      } else {
+        dispatch({
+          type: ShoppingListActionType.GET_SHOPPING_LIST_FAIL,
+          payload: "Failed to fetch shopping lists, please try again later",
+        });
+      }
     }
   };
