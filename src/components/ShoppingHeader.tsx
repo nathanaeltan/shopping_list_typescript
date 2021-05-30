@@ -1,4 +1,4 @@
-import { Heading, StackDivider, VStack } from "@chakra-ui/react";
+import { Heading, VStack } from "@chakra-ui/react";
 import React from "react";
 
 const ShoppingHeader: React.FC<{ header: string }> = ({ header }) => {

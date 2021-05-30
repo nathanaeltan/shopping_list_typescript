@@ -1,11 +1,7 @@
 import {
-  Center,
-  Divider,
-  Flex,
   Heading,
   HStack,
   SimpleGrid,
-  Spacer,
   StackDivider,
   Text,
   VStack,
@@ -22,36 +18,87 @@ import React, { useEffect, useState } from "react";
 import { useActions } from "../hooks/useActions";
 import { useSelector } from "../hooks/useTypedSelector";
 import { ShoppingItem } from "../state/action-types/ShoppingListItemActionTypes";
+import { ShoppingList } from "../state/actions/ShoppingListActions";
 import Select from "react-select";
-import { FaTrash } from "react-icons/fa";
 import ShoppingItemComponent from "../components/ShoppingItem";
 import ShoppingHeader from "../components/ShoppingHeader";
+import { FaPlus } from "react-icons/fa";
+
+interface itemOptions {
+  value: string;
+  label: string;
+}
+
 const Dashboard: React.FC = () => {
-  const { fetchUsersShoppingLists } = useActions();
-
-  const [selectedListItems, selectList] = useState<ShoppingItem[]>([]);
+  // ACTIONS
+  const { fetchUsersShoppingLists, fetchAllShoppingItems } = useActions();
+  // STATE
   const [selectedListId, selectListId] = useState<number | null>(null);
+  const [shoppingItem, selectShoppingItem] = useState<itemOptions | null>(null);
+  const [shoppingLists, setShoppingList] = useState<ShoppingList[]>([]);
   const { onClose, isOpen, onOpen } = useDisclosure();
-  // const [isOpen, setOpen] = useState(false);
-  useEffect(() => {
-    fetchUsersShoppingLists();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  const { loading, shoppinglists, error } = useSelector(
+  // REDUX
+  const { loading: shoppingListLoading, shoppinglists } = useSelector(
     (state) => state.shoppingList
   );
+  const { shoppingItems, loading: shoppingItemLoading } = useSelector(
+    (state) => state.shoppingItem
+  );
+
+  useEffect(() => {
+    if (shoppingListLoading) {
+      fetchUsersShoppingLists();
+      fetchAllShoppingItems();
+    }
+
+    if (shoppinglists) {
+      setShoppingList(shoppinglists);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shoppingListLoading]);
+
   const onSelectList = (listIdx: number) => {
+    selectShoppingItem(null);
     if (isOpen) {
       onClose();
     }
     selectListId(listIdx);
     setTimeout(() => {
-      selectList(shoppinglists[listIdx]["items"]);
-
       onOpen();
     }, 250);
   };
+
+  const itemOptions = shoppingItems?.map((shoppingItem): itemOptions => {
+    return { value: shoppingItem.itemId, label: shoppingItem.itemName };
+  });
+
+  const onItemChange = (data: itemOptions | null) => {
+    selectShoppingItem(data);
+  };
+
+  const addItemToList = () => {
+    if (shoppingItem && selectedListId) {
+      const shoppingItemFound: ShoppingItem | undefined = shoppingItems.find(
+        (item) => item.itemId === shoppingItem.value
+      );
+      if (shoppingItemFound) {
+        setShoppingList((prevState) => {
+          return prevState.map((list, idx) => {
+            if (idx === selectedListId) {
+              return {
+                ...prevState[selectedListId],
+                items: [...prevState[selectedListId].items, shoppingItemFound],
+              };
+            } else {
+              return list;
+            }
+          });
+        });
+      }
+    }
+  };
+
   return (
     <SimpleGrid
       columns={2}
@@ -72,8 +119,8 @@ const Dashboard: React.FC = () => {
       >
         <ShoppingHeader header={"Shopping Lists"} />
 
-        {!loading ? (
-          shoppinglists.map((list, idx) => {
+        {!shoppingListLoading ? (
+          shoppingLists?.map((list: ShoppingList, idx: number) => {
             return (
               <Box
                 key={"BOX" + idx}
@@ -113,6 +160,8 @@ const Dashboard: React.FC = () => {
               divider={<StackDivider borderColor="gray.200" />}
               alignItems="stretch"
               width="100%"
+              overflow="auto"
+              height="40vh"
             >
               <HStack justifyContent="space-between" padding={2}>
                 <HStack justifyContent="space-between" width="50%">
@@ -120,17 +169,35 @@ const Dashboard: React.FC = () => {
                   <Text fontWeight="bold">Price</Text>
                 </HStack>
               </HStack>
-              {selectedListItems?.map((item: ShoppingItem) => {
-                return <ShoppingItemComponent item={item} />;
-              })}
+              {selectedListId !== null &&
+                shoppingLists &&
+                shoppingLists[selectedListId].items.map(
+                  (item: ShoppingItem) => {
+                    return (
+                      <ShoppingItemComponent key={item.itemId} item={item} />
+                    );
+                  }
+                )}
             </VStack>
           </VStack>
           <VStack width="100%">
             <Heading size="md">Add an Item</Heading>
             <HStack width="100%" alignItems="stretch" justifyContent="center">
               <Container>
-                <Select width="100%" />
+                <Select
+                  width="100%"
+                  options={itemOptions}
+                  onChange={onItemChange}
+                  value={shoppingItem}
+                />
               </Container>
+              <IconButton
+                isRound={true}
+                icon={<FaPlus />}
+                aria-label="addItem"
+                bg="green.400"
+                onClick={addItemToList}
+              />
             </HStack>
           </VStack>
         </VStack>

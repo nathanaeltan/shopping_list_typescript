@@ -54,14 +54,16 @@ const authReducer = (
         ...state,
         loading: false,
         isAuthenticated: true,
-        error: null
+        error: null,
       };
     case AuthActionType.VERIFY_FAILURE:
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
       return {
         ...state,
         loading: false,
-        isAuthenticated: false
-      }
+        isAuthenticated: false,
+      };
     default:
       return state;
   }

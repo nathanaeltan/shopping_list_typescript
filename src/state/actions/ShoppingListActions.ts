@@ -1,10 +1,10 @@
 import { ShoppingListActionType } from "../action-types/ShoppingListActionTypes";
 import { ShoppingItem } from "../action-types/ShoppingListItemActionTypes";
 
-interface ShoppingList {
+export interface ShoppingList {
   listId: string;
   listName: string;
-  items: Array<ShoppingItem>;
+  items: Array<ShoppingItem> | [];
 }
 
 interface GetShoppingListSuccessAction {
