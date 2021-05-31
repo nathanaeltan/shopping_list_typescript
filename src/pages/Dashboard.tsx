@@ -1,30 +1,15 @@
-import {
-  Heading,
-  HStack,
-  SimpleGrid,
-  StackDivider,
-  Text,
-  VStack,
-} from "@chakra-ui/layout";
-import {
-  Box,
-  Container,
-  IconButton,
-  ScaleFade,
-  Spinner,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { SimpleGrid } from "@chakra-ui/layout";
+import { useDisclosure } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useActions } from "../hooks/useActions";
 import { useSelector } from "../hooks/useTypedSelector";
 import { ShoppingItem } from "../state/action-types/ShoppingListItemActionTypes";
 import { ShoppingList } from "../state/actions/ShoppingListActions";
-import Select from "react-select";
-import ShoppingItemComponent from "../components/ShoppingItem";
-import ShoppingHeader from "../components/ShoppingHeader";
-import { FaPlus } from "react-icons/fa";
 
-interface itemOptions {
+import ShoppingListComponent from "../components/ShoppingListComponent";
+import ShoppingItemsComponent from "../components/ShoppingItemsComponent";
+
+export interface itemOptions {
   value: string;
   label: string;
 }
@@ -42,9 +27,7 @@ const Dashboard: React.FC = () => {
   const { loading: shoppingListLoading, shoppinglists } = useSelector(
     (state) => state.shoppingList
   );
-  const { shoppingItems, loading: shoppingItemLoading } = useSelector(
-    (state) => state.shoppingItem
-  );
+  const { shoppingItems } = useSelector((state) => state.shoppingItem);
 
   useEffect(() => {
     if (shoppingListLoading) {
@@ -108,100 +91,22 @@ const Dashboard: React.FC = () => {
       backgroundColor="gray.100"
       border={30}
     >
-      <VStack
-        bg="green.100"
-        height="70vh"
-        padding="10"
-        spacing={4}
-        borderRadius={30}
-        alignItems=""
-        divider={<StackDivider borderColor="gray.400" />}
-      >
-        <ShoppingHeader header={"Shopping Lists"} />
+      <ShoppingListComponent
+        shoppingListLoading={shoppingListLoading}
+        shoppingLists={shoppingLists}
+        onSelectList={onSelectList}
+        selectedListId={selectedListId}
+      />
 
-        {!shoppingListLoading ? (
-          shoppingLists?.map((list: ShoppingList, idx: number) => {
-            return (
-              <Box
-                key={"BOX" + idx}
-                onClick={() => onSelectList(idx)}
-                _hover={{ bg: "green.200" }}
-                cursor="pointer"
-                padding="3"
-                borderRadius={15}
-                bg={selectedListId === idx ? "green.200" : ""}
-              >
-                <Text>{list.listName}</Text>
-              </Box>
-            );
-          })
-        ) : (
-          <Spinner />
-        )}
-      </VStack>
-
-      <ScaleFade in={isOpen} unmountOnExit={true}>
-        <VStack
-          divider={<StackDivider borderColor="gray.400" />}
-          bg="green.100"
-          height="70vh"
-          padding="10"
-          spacing={5}
-          borderRadius={30}
-          justifyContent="space-between"
-        >
-          <VStack
-            width="100%"
-            divider={<StackDivider borderColor="gray.400" />}
-          >
-            <ShoppingHeader header={"Shopping Item"} />
-            <VStack
-              spacing={2}
-              divider={<StackDivider borderColor="gray.200" />}
-              alignItems="stretch"
-              width="100%"
-              overflow="auto"
-              height="40vh"
-            >
-              <HStack justifyContent="space-between" padding={2}>
-                <HStack justifyContent="space-between" width="50%">
-                  <Text fontWeight="bold">Name</Text>
-                  <Text fontWeight="bold">Price</Text>
-                </HStack>
-              </HStack>
-              {selectedListId !== null &&
-                shoppingLists &&
-                shoppingLists[selectedListId].items.map(
-                  (item: ShoppingItem) => {
-                    return (
-                      <ShoppingItemComponent key={item.itemId} item={item} />
-                    );
-                  }
-                )}
-            </VStack>
-          </VStack>
-          <VStack width="100%">
-            <Heading size="md">Add an Item</Heading>
-            <HStack width="100%" alignItems="stretch" justifyContent="center">
-              <Container>
-                <Select
-                  width="100%"
-                  options={itemOptions}
-                  onChange={onItemChange}
-                  value={shoppingItem}
-                />
-              </Container>
-              <IconButton
-                isRound={true}
-                icon={<FaPlus />}
-                aria-label="addItem"
-                bg="green.400"
-                onClick={addItemToList}
-              />
-            </HStack>
-          </VStack>
-        </VStack>
-      </ScaleFade>
+      <ShoppingItemsComponent
+        isOpen={isOpen}
+        selectedListId={selectedListId}
+        shoppingLists={shoppingLists}
+        itemOptions={itemOptions}
+        onItemChange={onItemChange}
+        shoppingItem={shoppingItem}
+        addItemToList={addItemToList}
+      />
     </SimpleGrid>
   );
 };
